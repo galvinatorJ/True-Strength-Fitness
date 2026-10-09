@@ -1,0 +1,192 @@
+# Project Structure
+
+This file maintains an up-to-date list of project files and structure.
+
+## File Structure
+
+- 📁 `.claude/`
+  - 📄 `.claude\settings.json` (JSON)
+- 📁 `.expo/`
+  - 📁 `.expo\dev/`
+    - 📁 `.expo\dev\logs/`
+  - 📁 `.expo\static-tmp/`
+    - 📄 `.expo\static-tmp\_error.js` (JavaScript)
+      - *Imports:* `@expo/log-box/src/logbox-web-polyfill`, `react-native`
+  - 📁 `.expo\types/`
+    - 📄 `.expo\types\router.d.ts` (TypeScript)
+      - *Imports:* `expo-router`
+      - *Exports:* `* from expo-router`
+  - 📁 `.expo\web/`
+    - 📁 `.expo\web\cache/`
+      - 📁 `.expo\web\cache\production/`
+        - 📁 `.expo\web\cache\production\images/`
+          - 📁 `.expo\web\cache\production\images\favicon/`
+            - 📁 `.expo\web\cache\production\images\favicon\favicon-a4e030697a7571b3e95d31860e4da55d2f98e5e861e2b55e414f45a8556828ba-contain-transparent/`
+              - 📄 `.expo\web\cache\production\images\favicon\favicon-a4e030697a7571b3e95d31860e4da55d2f98e5e861e2b55e414f45a8556828ba-contain-transparent\favicon-48.png` (Unknown)
+  - 📄 `.expo\devices.json` (JSON)
+  - 📄 `.expo\README.md` (Markdown)
+  - 📄 `.expo\settings.json` (JSON)
+- 📁 `.vscode/`
+  - 📄 `.vscode\extensions.json` (JSON)
+  - 📄 `.vscode\project-structure.md` (Markdown)
+  - 📄 `.vscode\settings.json` (JSON)
+- 📁 `assets/`
+  - 📁 `assets\expo.icon/`
+    - 📁 `assets\expo.icon\Assets/`
+    - 📄 `assets\expo.icon\icon.json` (JSON)
+  - 📁 `assets\images/`
+    - 📁 `assets\images\tabIcons/`
+    - 📄 `assets\images\android-icon-background.png` (Unknown)
+    - 📄 `assets\images\android-icon-foreground.png` (Unknown)
+    - 📄 `assets\images\android-icon-monochrome.png` (Unknown)
+    - 📄 `assets\images\bear.png` (Unknown)
+    - 📄 `assets\images\expo-badge-white.png` (Unknown)
+    - 📄 `assets\images\expo-badge.png` (Unknown)
+    - 📄 `assets\images\expo-logo.png` (Unknown)
+    - 📄 `assets\images\favicon.png` (Unknown)
+    - 📄 `assets\images\icon.png` (Unknown)
+    - 📄 `assets\images\logo-glow.png` (Unknown)
+    - 📄 `assets\images\logo.jpeg` (Unknown)
+    - 📄 `assets\images\react-logo.png` (Unknown)
+    - 📄 `assets\images\react-logo@2x.png` (Unknown)
+    - 📄 `assets\images\react-logo@3x.png` (Unknown)
+    - 📄 `assets\images\splash-icon.png` (Unknown)
+    - 📄 `assets\images\tutorial-web.png` (Unknown)
+- 📁 `scripts/`
+  - 📄 `scripts\reset-project.js` (JavaScript)
+    - *Imports:* `fs`, `path`, `readline`
+- 📁 `src/`
+  - 📁 `src\app/`
+    - 📁 `src\app\(tabs)/`
+      - 📄 `src\app\(tabs)\_layout.tsx` (React TypeScript)
+        - *Imports:* `@expo/vector-icons`, `expo-router`, `react`, `../../services/supabase`
+        - *Exports:* `TabLayout`
+      - 📄 `src\app\(tabs)\account.tsx` (React TypeScript)
+        - *Imports:* `expo-router`, `lucide-react-native`, `react`, `react-native`, `react-native-safe-area-context`, `../../services/stripeWrapper`, `../../services/supabase`
+        - *Exports:* `ProfileScreen`
+      - 📄 `src\app\(tabs)\home.tsx` (React TypeScript)
+        - *Imports:* `@expo/vector-icons`, `expo-router`, `react`, `react-native`, `react-native-safe-area-context`, `../../services/stripeWrapper`, `../../services/supabase`
+        - *Exports:* `HomeScreen`
+      - 📄 `src\app\(tabs)\qr.tsx` (React TypeScript)
+        - *Imports:* `@expo/vector-icons`, `expo-file-system/legacy`, `expo-print`, `expo-router`, `expo-sharing`, `react`, `react-native`, `react-native-qrcode-svg`, `react-native-safe-area-context`, `../../services/supabase`
+        - *Exports:* `QRScreen`
+    - 📁 `src\app\gym/`
+      - 📄 `src\app\gym\[id].tsx` (React TypeScript)
+        - *Imports:* `@expo/vector-icons`, `expo-camera`, `expo-router`, `react`, `react-native`, `react-native-safe-area-context`, `../../services/supabase`
+        - *Exports:* `GymDetailScreen`
+    - 📄 `src\app\_layout.tsx` (React TypeScript)
+      - *Imports:* `expo-router`, `expo-status-bar`, `react`, `react-native`, `../services/stripeWrapper`, `../services/supabase`
+      - *Exports:* `RootLayout`
+    - 📄 `src\app\index.tsx` (React TypeScript)
+      - *Imports:* `@expo/vector-icons`, `expo-router`, `react`, `react-native`, `../services/supabase`
+      - *Exports:* `AuthScreen`
+    - 📄 `src\app\membership_backup.tsx` (React TypeScript)
+      - *Imports:* `@expo/vector-icons`, `expo-router`, `react`, `react-native`, `react-native-safe-area-context`, `../services/stripeWrapper`, `../services/supabase`
+      - *Exports:* `MembershipScreen`
+    - 📄 `src\app\membership.tsx` (React TypeScript)
+      - *Imports:* `@expo/vector-icons`, `expo-router`, `react`, `react-native`, `react-native-safe-area-context`, `../services/stripeWrapper`, `../services/supabase`
+      - *Exports:* `MembershipScreen`
+    - 📄 `src\app\scanner.tsx` (React TypeScript)
+      - *Imports:* `@expo/vector-icons`, `expo-camera`, `expo-router`, `react`, `react-native`, `react-native-safe-area-context`, `../services/supabase`
+      - *Exports:* `ScannerScreen`
+  - 📁 `src\components/`
+    - 📁 `src\components\ui/`
+    - 📄 `src\components\animated-icon.module.css` (CSS)
+    - 📄 `src\components\animated-icon.tsx` (React TypeScript)
+      - *Imports:* `expo-image`, `react`, `react-native`, `react-native-reanimated`, `react-native-worklets`
+      - *Exports:* `AnimatedSplashOverlay`, `AnimatedIcon`
+    - 📄 `src\components\animated-icon.web.tsx` (React TypeScript)
+      - *Imports:* `expo-image`, `react-native`, `react-native-reanimated`, `./animated-icon.module.css`
+      - *Exports:* `AnimatedSplashOverlay`, `AnimatedIcon`
+    - 📄 `src\components\app-tabs.tsx` (React TypeScript)
+      - *Imports:* `expo-router/unstable-native-tabs`, `react-native`, `@/constants/theme`
+      - *Exports:* `AppTabs`
+    - 📄 `src\components\app-tabs.web.tsx` (React TypeScript)
+      - *Imports:* `expo-router/ui`, `expo-symbols`, `react-native`, `./external-link`, `./themed-text`, `./themed-view`, `@/constants/theme`
+      - *Exports:* `AppTabs`, `TabButton`, `CustomTabList`
+    - 📄 `src\components\external-link.tsx` (React TypeScript)
+      - *Imports:* `expo-router`, `expo-web-browser`, `react`
+      - *Exports:* `ExternalLink`
+    - 📄 `src\components\hint-row.tsx` (React TypeScript)
+      - *Imports:* `react`, `react-native`, `./themed-text`, `./themed-view`, `@/constants/theme`
+      - *Exports:* `HintRow`
+    - 📄 `src\components\themed-text.tsx` (React TypeScript)
+      - *Imports:* `react-native`, `@/constants/theme`, `@/hooks/use-theme`
+      - *Exports:* `ThemedText`
+    - 📄 `src\components\themed-view.tsx` (React TypeScript)
+      - *Imports:* `react-native`, `@/constants/theme`, `@/hooks/use-theme`
+      - *Exports:* `ThemedView`
+    - 📄 `src\components\web-badge.tsx` (React TypeScript)
+      - *Imports:* `expo/package.json`, `expo-image`, `react-native`, `./themed-text`, `./themed-view`, `@/constants/theme`
+      - *Exports:* `WebBadge`
+  - 📁 `src\constants/`
+    - 📄 `src\constants\theme.ts` (TypeScript)
+      - *Imports:* `@/global.css`, `react-native`
+  - 📁 `src\hooks/`
+    - 📄 `src\hooks\use-color-scheme.ts` (TypeScript)
+      - *Exports:* `* from react-native`
+    - 📄 `src\hooks\use-color-scheme.web.ts` (TypeScript)
+      - *Imports:* `react`, `react-native`
+      - *Exports:* `useColorScheme`
+    - 📄 `src\hooks\use-theme.ts` (TypeScript)
+      - *Imports:* `@/constants/theme`, `@/hooks/use-color-scheme`
+      - *Exports:* `useTheme`
+  - 📁 `src\services/`
+    - 📄 `src\services\stripeWrapper.ts` (TypeScript)
+      - *Exports:* `* from @stripe/stripe-react-native`
+    - 📄 `src\services\stripeWrapper.web.ts` (TypeScript)
+    - 📄 `src\services\supabase.ts` (TypeScript)
+      - *Imports:* `@react-native-async-storage/async-storage`, `@supabase/supabase-js`, `react-native`, `react-native-url-polyfill/auto`
+  - 📄 `src\global.css` (CSS)
+- 📁 `supabase/`
+  - 📁 `supabase\.temp/`
+    - 📄 `supabase\.temp\cli-latest` (Unknown)
+    - 📄 `supabase\.temp\gotrue-version` (Unknown)
+    - 📄 `supabase\.temp\linked-project.json` (JSON)
+    - 📄 `supabase\.temp\pooler-url` (Unknown)
+    - 📄 `supabase\.temp\postgres-version` (Unknown)
+    - 📄 `supabase\.temp\project-ref` (Unknown)
+    - 📄 `supabase\.temp\rest-version` (Unknown)
+    - 📄 `supabase\.temp\storage-migration` (Unknown)
+    - 📄 `supabase\.temp\storage-version` (Unknown)
+  - 📁 `supabase\functions/`
+    - 📁 `supabase\functions\cancel-subscription/`
+      - 📄 `supabase\functions\cancel-subscription\deno.json` (JSON)
+      - 📄 `supabase\functions\cancel-subscription\index.ts` (TypeScript)
+        - *Imports:* `@supabase/supabase-js`, `serve`, `stripe`
+    - 📁 `supabase\functions\create-subscription/`
+      - 📄 `supabase\functions\create-subscription\deno.json` (JSON)
+      - 📄 `supabase\functions\create-subscription\index.ts` (TypeScript)
+        - *Imports:* `@supabase/supabase-js`, `stripe`
+    - 📁 `supabase\functions\delete-account/`
+      - 📄 `supabase\functions\delete-account\index.ts` (TypeScript)
+        - *Imports:* `@supabase/supabase-js`, `serve`, `stripe`
+    - 📁 `supabase\functions\resume-subscription/`
+      - 📄 `supabase\functions\resume-subscription\.npmrc` (Unknown)
+      - 📄 `supabase\functions\resume-subscription\deno.json` (JSON)
+      - 📄 `supabase\functions\resume-subscription\index.ts` (TypeScript)
+        - *Imports:* `npm:@supabase/supabase-js@^2.45.0`, `stripe`
+    - 📁 `supabase\functions\stripe-webhook/`
+      - 📄 `supabase\functions\stripe-webhook\Backup index.ts` (TypeScript)
+        - *Imports:* `@supabase/supabase-js`, `stripe`
+      - 📄 `supabase\functions\stripe-webhook\index.ts` (TypeScript)
+        - *Imports:* `@supabase/supabase-js`, `stripe`
+    - 📄 `supabase\functions\deno.json` (JSON)
+  - 📄 `supabase\config.toml` (Unknown)
+- 📄 `.env` (Unknown)
+- 📄 `.gitignore` (Unknown)
+- 📄 `AGENTS.md` (Markdown)
+- 📄 `app.json` (JSON)
+- 📄 `Book Recovery-legacy file.txt` (Unknown)
+- 📄 `CLAUDE.md` (Markdown)
+- 📄 `deno.json` (JSON)
+- 📄 `eas.json` (JSON)
+- 📄 `expo-env.d.ts` (TypeScript)
+- 📄 `LICENSE` (Unknown)
+- 📄 `package-lock.json` (JSON)
+- 📄 `package.json` (JSON)
+- 📄 `README.md` (Markdown)
+- 📄 `tsconfig.json` (JSON)
+
+---
+Last updated: 2026-10-09T09:51:25.767Z

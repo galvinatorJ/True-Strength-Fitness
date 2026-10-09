@@ -1,0 +1,63 @@
+{
+  "expo": {
+    "name": "True Strength",
+    "slug": "true-strength",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/images/icon.png",
+    "scheme": "truestrength",
+    "userInterfaceStyle": "automatic",
+    "ios": {
+      "bundleIdentifier": "uk.co.truestrengthandfitness.app",
+      "infoPlist": {
+        "NSCameraUsageDescription": "True Strength requires camera access to allow staff members to scan customer QR codes for gym entrance verification."
+      }
+    },
+    "android": {
+      "package": "com.truestrength.app",
+      "permissions": [
+        "android.permission.CAMERA"
+      ],
+      "predictiveBackGestureEnabled": false
+    },
+    "web": {
+      "output": "static",
+      "favicon": "./assets/images/icon.png"
+    },
+    "plugins": [
+      "expo-router",
+      [
+        "expo-splash-screen",
+        {
+          "backgroundColor": "#000000",
+          "image": "./assets/images/splash-icon.png",
+          "imageWidth": 200
+        }
+      ],
+      "expo-font",
+      "expo-web-browser",
+      [
+        "@stripe/stripe-react-native",
+        {}
+      ],
+      "expo-sharing",
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "True Strength requires camera access to allow staff members to scan customer QR codes for gym entrance verification."
+        }
+      ]
+    ],
+    "experiments": {
+      "typedRoutes": true,
+      "reactCompiler": true
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "8a23d9b8-25df-4924-96ea-02b816f77539"
+      }
+    },
+    "owner": "galvinatorj"
+  }
+}

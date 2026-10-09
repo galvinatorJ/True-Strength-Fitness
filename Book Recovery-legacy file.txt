@@ -1,0 +1,333 @@
+import { Ionicons } from '@expo/vector-icons';
+import { useRouter } from 'expo-router';
+import React, { useEffect, useState } from 'react';
+import {
+  ActivityIndicator,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View
+} from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { supabase } from '../../services/supabase';
+
+const theme = {
+  background: '#000000',
+  surface: '#121212',
+  surfaceHighlight: '#1A1A1A',
+  primary: '#D4AF37',
+  textLight: '#FFFFFF',
+  textMuted: '#888888',
+  cardBorder: '#2A2A2A',
+};
+
+const TIERS_DATA = [
+  { id: 'foundation_bronze', line1: 'FOUNDATION', line2: 'BRONZE', minPoints: 0, cap: 500, perk: '75% of members entry' },
+  { id: 'perform_silver', line1: 'PERFORM', line2: 'SILVER', minPoints: 500, cap: 2000, perk: 'Top 35% member club privilege' },
+  { id: 'momentum_gold', line1: 'MOMENTUM', line2: 'GOLD', minPoints: 2000, cap: 5000, perk: 'Top 17% members exclusive rates' },
+  { id: 'ascend_platinum', line1: 'ASCEND', line2: 'PLATINUM', minPoints: 5000, cap: 10000, perk: 'Top 12% priority access rewards' },
+  { id: 'vault_elite_ruby', line1: 'VAULT ELITE', line2: 'RUBY', minPoints: 10000, cap: 25000, perk: 'Top 10% premium lounge entry' },
+  { id: 'vault_specialist_blue_diamond', line1: 'VAULT SPECIALIST', line2: 'BLUE DIAMOND', minPoints: 25000, cap: 999999, perk: 'Top 1% ultra premium ecosystem access' },
+];
+
+export default function ProgressScreen() {
+  const router = useRouter();
+  const [loading, setLoading] = useState(true);
+  const [activeTab, setActiveTab] = useState<'tiers' | 'streaks'>('tiers');
+  const [lifetimePoints, setLifetimePoints] = useState(0);
+  const [streakData, setStreakData] = useState({ current: 0, longest: 0 });
+
+  useEffect(() => {
+    const fetchData = async () => {
+      setLoading(true);
+      try {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) { 
+          setLoading(false); 
+          return; 
+        }
+
+        // Fetch Lifetime Points safely
+        const { data: userData, error: userError } = await supabase
+          .from('users')
+          .select('lifetime_points')
+          .eq('id', user.id)
+          .maybeSingle();
+
+        if (userError) {
+          console.error('Error fetching lifetime points:', userError);
+        } else if (userData?.lifetime_points !== undefined) {
+          setLifetimePoints(userData.lifetime_points);
+        }
+
+        // Fetch Streaks safely
+        const { data: streakRow, error: streakError } = await supabase
+          .from('user_streaks')
+          .select('*')
+          .eq('user_id', user.id)
+          .maybeSingle();
+
+        if (streakError) {
+          console.error('Error fetching user streaks:', streakError);
+        } else if (streakRow) {
+          setStreakData({ 
+            current: streakRow.current_streak_count ?? 0, 
+            longest: streakRow.longest_streak ?? streakRow.longest_streak_count ?? 0 
+          });
+        }
+      } catch (error) {
+        console.error('Unexpected error fetching progress data:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, []);
+
+  const getTierState = (min: number, cap: number) => {
+    if (lifetimePoints >= min && lifetimePoints < cap) return 'current';
+    if (lifetimePoints >= cap) return 'unlocked';
+    return 'locked';
+  };
+
+  if (loading) {
+    return (
+      <View style={styles.loaderContainer}>
+        <ActivityIndicator size="large" color={theme.primary} />
+      </View>
+    );
+  }
+
+  return (
+    <SafeAreaView style={styles.container}>
+      <View style={styles.headerRow}>
+        <TouchableOpacity style={styles.backButton} onPress={() => router.push('/(tabs)/home')} activeOpacity={0.7}>
+          <Ionicons name="arrow-back" size={24} color={theme.textLight} />
+        </TouchableOpacity>
+        <Text style={styles.headerTitle}>PROGRESS</Text>
+        <View style={{ width: 40 }} />
+      </View>
+
+      {/* Tab Switcher */}
+      <View style={styles.tabContainer}>
+        <TouchableOpacity style={[styles.tab, activeTab === 'tiers' && styles.activeTab]} onPress={() => setActiveTab('tiers')}>
+          <Text style={[styles.tabText, activeTab === 'tiers' && styles.activeTabText]}>Tiers</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={[styles.tab, activeTab === 'streaks' && styles.activeTab]} onPress={() => setActiveTab('streaks')}>
+          <Text style={[styles.tabText, activeTab === 'streaks' && styles.activeTabText]}>Streaks</Text>
+        </TouchableOpacity>
+      </View>
+
+      <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
+        {activeTab === 'tiers' ? (
+          <>
+            <View style={styles.summaryCard}>
+              <Text style={styles.summaryLabel}>TOTAL LIFETIME BALANCE</Text>
+              <Text style={styles.summaryPoints}>{lifetimePoints.toLocaleString()} <Text style={styles.hpLabelText}>FV</Text></Text>
+            </View>
+            <Text style={styles.sectionTitle}>TIER PROGRESSION</Text>
+            {TIERS_DATA.map((tier) => {
+              const state = getTierState(tier.minPoints, tier.cap);
+              return (
+                <View key={tier.id} style={styles.timelineItem}>
+                  <View style={styles.leftColumn}>
+                    <View style={[styles.timelineDot, state === 'unlocked' && styles.dotUnlocked, state === 'current' && styles.dotCurrent]} />
+                  </View>
+                  <View style={[styles.rightColumn, state === 'current' && styles.cardCurrentBorder]}>
+                    <Text style={styles.tierTitleText}>{tier.line1} {tier.line2}</Text>
+                    <Text style={styles.perkText}>{tier.perk}</Text>
+                  </View>
+                </View>
+              );
+            })}
+          </>
+        ) : (
+          /* Streaks View */
+          <View>
+            <View style={styles.summaryCard}>
+              <Text style={styles.summaryLabel}>CURRENT STREAK</Text>
+              <Text style={styles.summaryPoints}>{streakData.current} <Text style={styles.hpLabelText}>DAYS</Text></Text>
+            </View>
+            
+            <Text style={styles.sectionTitle}>UPCOMING MILESTONES</Text>
+            
+            <View style={styles.rulesCard}>
+              {streakData.current < 3 ? (
+                <Text style={styles.ruleBody}>🔥 {3 - streakData.current} days until 3-Day Streak (+100 FV)</Text>
+              ) : streakData.current < 7 ? (
+                <Text style={styles.ruleBody}>🔥 {7 - streakData.current} days until 1-Week Streak (+250 FV)</Text>
+              ) : (
+                <Text style={styles.ruleBody}>🔥 Keep going! Next stop: 1-Month Streak (+1250 FV)</Text>
+              )}
+            </View>
+          </View>
+        )}
+      </ScrollView>
+    </SafeAreaView>
+  );
+}
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: theme.background,
+  },
+  loaderContainer: {
+    flex: 1,
+    backgroundColor: theme.background,
+    justifyContent: 'center', // Fixed: Changed 'justify' to 'justifyContent'
+    alignItems: 'center',
+  },
+  headerRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    borderBottomWidth: 1,
+    borderColor: theme.cardBorder,
+  },
+  backButton: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: theme.surface,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  headerTitle: {
+    color: theme.textLight,
+    fontSize: 16,
+    fontWeight: '700',
+    letterSpacing: 1,
+  },
+  scrollContent: {
+    padding: 20,
+    paddingBottom: 40,
+  },
+  summaryCard: {
+    backgroundColor: theme.surface,
+    borderColor: theme.cardBorder,
+    borderWidth: 1,
+    borderRadius: 16,
+    padding: 24,
+    alignItems: 'center',
+    marginBottom: 30,
+  },
+  summaryLabel: {
+    color: theme.textMuted,
+    fontSize: 10,
+    fontWeight: '700',
+    letterSpacing: 1.5,
+    marginBottom: 8,
+  },
+  summaryPoints: {
+    color: theme.primary,
+    fontSize: 36,
+    fontWeight: '800',
+    marginBottom: 8,
+  },
+  hpLabelText: {
+    fontSize: 18,
+    fontWeight: '500',
+    color: theme.textLight,
+  },
+  sectionTitle: {
+    color: theme.textLight,
+    fontSize: 14,
+    fontWeight: '700',
+    letterSpacing: 1,
+    marginBottom: 20,
+  },
+  timelineItem: {
+    flexDirection: 'row',
+    marginBottom: 16,
+  },
+  leftColumn: {
+    alignItems: 'center',
+    marginRight: 16,
+    width: 24,
+  },
+  timelineDot: {
+    width: 18,
+    height: 18,
+    borderRadius: 9,
+    backgroundColor: '#262626',
+    borderWidth: 2,
+    borderColor: '#404040',
+    justifyContent: 'center',
+    alignItems: 'center',
+    zIndex: 2,
+    marginTop: 14,
+  },
+  dotUnlocked: {
+    backgroundColor: theme.primary,
+    borderColor: theme.primary,
+  },
+  dotCurrent: {
+    backgroundColor: '#000000',
+    borderColor: theme.primary,
+    width: 20,
+    height: 20,
+    borderRadius: 10,
+  },
+  rightColumn: {
+    flex: 1,
+    backgroundColor: theme.surface,
+    borderWidth: 1,
+    borderColor: theme.cardBorder,
+    borderRadius: 14,
+    padding: 16,
+  },
+  cardCurrentBorder: {
+    borderColor: theme.primary,
+    backgroundColor: theme.surfaceHighlight,
+  },
+  tierTitleText: {
+    color: theme.textLight,
+    fontSize: 15,
+    fontWeight: '700',
+    letterSpacing: 0.5,
+  },
+  perkText: {
+    color: theme.textMuted,
+    fontSize: 13,
+    lineHeight: 18,
+    marginTop: 4,
+  },
+  rulesCard: {
+    backgroundColor: theme.surface,
+    borderWidth: 1,
+    borderColor: theme.cardBorder,
+    borderRadius: 16,
+    padding: 20,
+  },
+  ruleBody: {
+    color: theme.textMuted,
+    fontSize: 13,
+    lineHeight: 18,
+  },
+  tabContainer: {
+    flexDirection: 'row',
+    paddingHorizontal: 20,
+    marginTop: 10,
+    gap: 10,
+  },
+  tab: {
+    flex: 1,
+    paddingVertical: 12,
+    backgroundColor: theme.surface,
+    borderRadius: 8,
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: theme.cardBorder,
+  },
+  activeTab: {
+    backgroundColor: theme.primary,
+    borderColor: theme.primary,
+  },
+  tabText: { color: theme.textMuted, fontWeight: '600' },
+  activeTabText: { color: '#000' },
+});

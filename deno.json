@@ -1,0 +1,13 @@
+{
+ "compilerOptions": {
+    "allowJs": true,
+    "lib": ["deno.window"]
+  },
+ 
+  "lint": {
+    "rules": {
+      "tags": ["recommended"],
+      "exclude": ["no-explicit-any"]
+    }
+  }
+}

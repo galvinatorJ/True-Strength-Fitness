@@ -1,0 +1,16 @@
+{
+ "compilerOptions": {
+    "allowJs": true,
+    "lib": ["deno.window"]
+  },
+  "imports": {
+    "@supabase/supabase-js": "npm:@supabase/supabase-js@2",
+    "stripe": "npm:stripe@^14"
+  },
+  "lint": {
+    "rules": {
+      "tags": ["recommended"],
+      "exclude": ["no-explicit-any"]
+    }
+  }
+}
