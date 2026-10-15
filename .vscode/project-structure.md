@@ -20,9 +20,32 @@ This file maintains an up-to-date list of project files and structure.
     - 📁 `.expo\web\cache/`
       - 📁 `.expo\web\cache\production/`
         - 📁 `.expo\web\cache\production\images/`
+          - 📁 `.expo\web\cache\production\images\android-adaptive-foreground/`
+            - 📁 `.expo\web\cache\production\images\android-adaptive-foreground\android-adaptive-foreground-372af3534139ea40d2fd97f6456e1c479fd2fa5999e72bbca24eb17af04f0f95-cover-transparent/`
+              - 📄 `.expo\web\cache\production\images\android-adaptive-foreground\android-adaptive-foreground-372af3534139ea40d2fd97f6456e1c479fd2fa5999e72bbca24eb17af04f0f95-cover-transparent\icon_108.png` (Unknown)
+              - 📄 `.expo\web\cache\production\images\android-adaptive-foreground\android-adaptive-foreground-372af3534139ea40d2fd97f6456e1c479fd2fa5999e72bbca24eb17af04f0f95-cover-transparent\icon_162.png` (Unknown)
+              - 📄 `.expo\web\cache\production\images\android-adaptive-foreground\android-adaptive-foreground-372af3534139ea40d2fd97f6456e1c479fd2fa5999e72bbca24eb17af04f0f95-cover-transparent\icon_216.png` (Unknown)
+              - 📄 `.expo\web\cache\production\images\android-adaptive-foreground\android-adaptive-foreground-372af3534139ea40d2fd97f6456e1c479fd2fa5999e72bbca24eb17af04f0f95-cover-transparent\icon_324.png` (Unknown)
+              - 📄 `.expo\web\cache\production\images\android-adaptive-foreground\android-adaptive-foreground-372af3534139ea40d2fd97f6456e1c479fd2fa5999e72bbca24eb17af04f0f95-cover-transparent\icon_432.png` (Unknown)
+          - 📁 `.expo\web\cache\production\images\android-standard-square/`
+            - 📁 `.expo\web\cache\production\images\android-standard-square\android-standard-square-372af3534139ea40d2fd97f6456e1c479fd2fa5999e72bbca24eb17af04f0f95-cover-transparent/`
+              - 📄 `.expo\web\cache\production\images\android-standard-square\android-standard-square-372af3534139ea40d2fd97f6456e1c479fd2fa5999e72bbca24eb17af04f0f95-cover-transparent\icon_144.png` (Unknown)
+              - 📄 `.expo\web\cache\production\images\android-standard-square\android-standard-square-372af3534139ea40d2fd97f6456e1c479fd2fa5999e72bbca24eb17af04f0f95-cover-transparent\icon_192.png` (Unknown)
+              - 📄 `.expo\web\cache\production\images\android-standard-square\android-standard-square-372af3534139ea40d2fd97f6456e1c479fd2fa5999e72bbca24eb17af04f0f95-cover-transparent\icon_48.png` (Unknown)
+              - 📄 `.expo\web\cache\production\images\android-standard-square\android-standard-square-372af3534139ea40d2fd97f6456e1c479fd2fa5999e72bbca24eb17af04f0f95-cover-transparent\icon_72.png` (Unknown)
+              - 📄 `.expo\web\cache\production\images\android-standard-square\android-standard-square-372af3534139ea40d2fd97f6456e1c479fd2fa5999e72bbca24eb17af04f0f95-cover-transparent\icon_96.png` (Unknown)
           - 📁 `.expo\web\cache\production\images\favicon/`
+            - 📁 `.expo\web\cache\production\images\favicon\favicon-372af3534139ea40d2fd97f6456e1c479fd2fa5999e72bbca24eb17af04f0f95-contain-transparent/`
+              - 📄 `.expo\web\cache\production\images\favicon\favicon-372af3534139ea40d2fd97f6456e1c479fd2fa5999e72bbca24eb17af04f0f95-contain-transparent\favicon-48.png` (Unknown)
             - 📁 `.expo\web\cache\production\images\favicon\favicon-a4e030697a7571b3e95d31860e4da55d2f98e5e861e2b55e414f45a8556828ba-contain-transparent/`
               - 📄 `.expo\web\cache\production\images\favicon\favicon-a4e030697a7571b3e95d31860e4da55d2f98e5e861e2b55e414f45a8556828ba-contain-transparent\favicon-48.png` (Unknown)
+          - 📁 `.expo\web\cache\production\images\splash-android/`
+            - 📁 `.expo\web\cache\production\images\splash-android\splash-android-8cf0bbec2bffd10e95227dabb445962e81c84484f6d197907502036e93e3e5cb-contain/`
+              - 📄 `.expo\web\cache\production\images\splash-android\splash-android-8cf0bbec2bffd10e95227dabb445962e81c84484f6d197907502036e93e3e5cb-contain\icon_200.png` (Unknown)
+              - 📄 `.expo\web\cache\production\images\splash-android\splash-android-8cf0bbec2bffd10e95227dabb445962e81c84484f6d197907502036e93e3e5cb-contain\icon_300.png` (Unknown)
+              - 📄 `.expo\web\cache\production\images\splash-android\splash-android-8cf0bbec2bffd10e95227dabb445962e81c84484f6d197907502036e93e3e5cb-contain\icon_400.png` (Unknown)
+              - 📄 `.expo\web\cache\production\images\splash-android\splash-android-8cf0bbec2bffd10e95227dabb445962e81c84484f6d197907502036e93e3e5cb-contain\icon_600.png` (Unknown)
+              - 📄 `.expo\web\cache\production\images\splash-android\splash-android-8cf0bbec2bffd10e95227dabb445962e81c84484f6d197907502036e93e3e5cb-contain\icon_800.png` (Unknown)
   - 📄 `.expo\devices.json` (JSON)
   - 📄 `.expo\README.md` (Markdown)
   - 📄 `.expo\settings.json` (JSON)
@@ -30,6 +53,70 @@ This file maintains an up-to-date list of project files and structure.
   - 📄 `.vscode\extensions.json` (JSON)
   - 📄 `.vscode\project-structure.md` (Markdown)
   - 📄 `.vscode\settings.json` (JSON)
+- 📁 `android/`
+  - 📁 `android\app/`
+    - 📁 `android\app\src/`
+      - 📁 `android\app\src\debug/`
+        - 📄 `android\app\src\debug\AndroidManifest.xml` (Unknown)
+      - 📁 `android\app\src\debugOptimized/`
+        - 📄 `android\app\src\debugOptimized\AndroidManifest.xml` (Unknown)
+      - 📁 `android\app\src\main/`
+        - 📁 `android\app\src\main\java/`
+          - 📁 `android\app\src\main\java\com/`
+            - 📁 `android\app\src\main\java\com\truestrength/`
+              - 📁 `android\app\src\main\java\com\truestrength\app/`
+                - 📄 `android\app\src\main\java\com\truestrength\app\MainActivity.kt` (Unknown)
+                - 📄 `android\app\src\main\java\com\truestrength\app\MainApplication.kt` (Unknown)
+        - 📁 `android\app\src\main\res/`
+          - 📁 `android\app\src\main\res\drawable/`
+            - 📄 `android\app\src\main\res\drawable\ic_launcher_background.xml` (Unknown)
+            - 📄 `android\app\src\main\res\drawable\rn_edit_text_material.xml` (Unknown)
+          - 📁 `android\app\src\main\res\drawable-hdpi/`
+            - 📄 `android\app\src\main\res\drawable-hdpi\splashscreen_logo.png` (Unknown)
+          - 📁 `android\app\src\main\res\drawable-mdpi/`
+            - 📄 `android\app\src\main\res\drawable-mdpi\splashscreen_logo.png` (Unknown)
+          - 📁 `android\app\src\main\res\drawable-xhdpi/`
+            - 📄 `android\app\src\main\res\drawable-xhdpi\splashscreen_logo.png` (Unknown)
+          - 📁 `android\app\src\main\res\drawable-xxhdpi/`
+            - 📄 `android\app\src\main\res\drawable-xxhdpi\splashscreen_logo.png` (Unknown)
+          - 📁 `android\app\src\main\res\drawable-xxxhdpi/`
+            - 📄 `android\app\src\main\res\drawable-xxxhdpi\splashscreen_logo.png` (Unknown)
+          - 📁 `android\app\src\main\res\mipmap-anydpi-v26/`
+          - 📁 `android\app\src\main\res\mipmap-hdpi/`
+            - 📄 `android\app\src\main\res\mipmap-hdpi\ic_launcher_foreground.webp` (Unknown)
+            - 📄 `android\app\src\main\res\mipmap-hdpi\ic_launcher.webp` (Unknown)
+          - 📁 `android\app\src\main\res\mipmap-mdpi/`
+            - 📄 `android\app\src\main\res\mipmap-mdpi\ic_launcher_foreground.webp` (Unknown)
+            - 📄 `android\app\src\main\res\mipmap-mdpi\ic_launcher.webp` (Unknown)
+          - 📁 `android\app\src\main\res\mipmap-xhdpi/`
+            - 📄 `android\app\src\main\res\mipmap-xhdpi\ic_launcher_foreground.webp` (Unknown)
+            - 📄 `android\app\src\main\res\mipmap-xhdpi\ic_launcher.webp` (Unknown)
+          - 📁 `android\app\src\main\res\mipmap-xxhdpi/`
+            - 📄 `android\app\src\main\res\mipmap-xxhdpi\ic_launcher_foreground.webp` (Unknown)
+            - 📄 `android\app\src\main\res\mipmap-xxhdpi\ic_launcher.webp` (Unknown)
+          - 📁 `android\app\src\main\res\mipmap-xxxhdpi/`
+            - 📄 `android\app\src\main\res\mipmap-xxxhdpi\ic_launcher_foreground.webp` (Unknown)
+            - 📄 `android\app\src\main\res\mipmap-xxxhdpi\ic_launcher.webp` (Unknown)
+          - 📁 `android\app\src\main\res\values/`
+            - 📄 `android\app\src\main\res\values\colors.xml` (Unknown)
+            - 📄 `android\app\src\main\res\values\strings.xml` (Unknown)
+            - 📄 `android\app\src\main\res\values\styles.xml` (Unknown)
+          - 📁 `android\app\src\main\res\values-night/`
+            - 📄 `android\app\src\main\res\values-night\colors.xml` (Unknown)
+        - 📄 `android\app\src\main\AndroidManifest.xml` (Unknown)
+    - 📄 `android\app\build.gradle` (Unknown)
+    - 📄 `android\app\debug.keystore` (Unknown)
+    - 📄 `android\app\proguard-rules.pro` (Unknown)
+  - 📁 `android\gradle/`
+    - 📁 `android\gradle\wrapper/`
+      - 📄 `android\gradle\wrapper\gradle-wrapper.jar` (Unknown)
+      - 📄 `android\gradle\wrapper\gradle-wrapper.properties` (Unknown)
+  - 📄 `android\.gitignore` (Unknown)
+  - 📄 `android\build.gradle` (Unknown)
+  - 📄 `android\gradle.properties` (Unknown)
+  - 📄 `android\gradlew` (Unknown)
+  - 📄 `android\gradlew.bat` (Unknown)
+  - 📄 `android\settings.gradle` (Unknown)
 - 📁 `assets/`
   - 📁 `assets\expo.icon/`
     - 📁 `assets\expo.icon\Assets/`
@@ -39,7 +126,6 @@ This file maintains an up-to-date list of project files and structure.
     - 📄 `assets\images\android-icon-background.png` (Unknown)
     - 📄 `assets\images\android-icon-foreground.png` (Unknown)
     - 📄 `assets\images\android-icon-monochrome.png` (Unknown)
-    - 📄 `assets\images\bear.png` (Unknown)
     - 📄 `assets\images\expo-badge-white.png` (Unknown)
     - 📄 `assets\images\expo-badge.png` (Unknown)
     - 📄 `assets\images\expo-logo.png` (Unknown)
@@ -68,17 +154,20 @@ This file maintains an up-to-date list of project files and structure.
         - *Imports:* `@expo/vector-icons`, `expo-router`, `react`, `react-native`, `react-native-safe-area-context`, `../../services/stripeWrapper`, `../../services/supabase`
         - *Exports:* `HomeScreen`
       - 📄 `src\app\(tabs)\qr.tsx` (React TypeScript)
-        - *Imports:* `@expo/vector-icons`, `expo-file-system/legacy`, `expo-print`, `expo-router`, `expo-sharing`, `react`, `react-native`, `react-native-qrcode-svg`, `react-native-safe-area-context`, `../../services/supabase`
+        - *Imports:* `@expo/vector-icons`, `expo-asset`, `expo-file-system/legacy`, `expo-print`, `expo-router`, `expo-sharing`, `react`, `react-native`, `react-native-qrcode-svg`, `react-native-safe-area-context`, `../../services/supabase`
         - *Exports:* `QRScreen`
     - 📁 `src\app\gym/`
       - 📄 `src\app\gym\[id].tsx` (React TypeScript)
         - *Imports:* `@expo/vector-icons`, `expo-camera`, `expo-router`, `react`, `react-native`, `react-native-safe-area-context`, `../../services/supabase`
         - *Exports:* `GymDetailScreen`
     - 📄 `src\app\_layout.tsx` (React TypeScript)
-      - *Imports:* `expo-router`, `expo-status-bar`, `react`, `react-native`, `../services/stripeWrapper`, `../services/supabase`
+      - *Imports:* `@react-native-async-storage/async-storage`, `expo-router`, `expo-status-bar`, `react`, `react-native`, `../services/stripeWrapper`, `../services/supabase`
       - *Exports:* `RootLayout`
+    - 📄 `src\app\email-address-confirmed.tsx` (React TypeScript)
+      - *Imports:* `expo-router`, `react`, `react-native`
+      - *Exports:* `EmailConfirmedScreen`
     - 📄 `src\app\index.tsx` (React TypeScript)
-      - *Imports:* `@expo/vector-icons`, `expo-router`, `react`, `react-native`, `../services/supabase`
+      - *Imports:* `@expo/vector-icons`, `@react-native-async-storage/async-storage`, `expo-router`, `react`, `react-native`, `../services/supabase`
       - *Exports:* `AuthScreen`
     - 📄 `src\app\membership_backup.tsx` (React TypeScript)
       - *Imports:* `@expo/vector-icons`, `expo-router`, `react`, `react-native`, `react-native-safe-area-context`, `../services/stripeWrapper`, `../services/supabase`
@@ -189,4 +278,4 @@ This file maintains an up-to-date list of project files and structure.
 - 📄 `tsconfig.json` (JSON)
 
 ---
-Last updated: 2026-10-09T09:51:25.767Z
+Last updated: 2026-10-15T13:19:40.114Z

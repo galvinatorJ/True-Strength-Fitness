@@ -19,9 +19,9 @@ import { supabase } from '../services/supabase';
 
 // 👇 STRIPE PRICE IDs 👇
 const PLAN_PRICE_IDS = {
-  recovery: 'price_1TwL9F9nla8sR27vfPqFjnVm', // Full Gym Use - 12 Month Contract
-  yearcontract: 'price_1U1lzl9nla8sR27vjOZPWodX', // Full Gym Use - Pay Monthly
-  daypass: 'price_1U0hZE9nla8sR27vsfLzhbmd', // Gym Day Pass
+  recovery: 'price_1UEUTx7RMmHfKOtjCBZnAknR', // Full Gym Use - 12 Month Contract
+  yearcontract: 'price_1UEUU17RMmHfKOtjO7vbTR6b', // Full Gym Use - Pay Monthly
+  daypass: 'price_1UQoVO7RMmHfKOtjDFNKMJMX', // Gym Day Pass
 };
 
 // 👇 PLAN METADATA 👇
@@ -387,10 +387,10 @@ export default function MembershipScreen() {
         const currentPlan = PLAN_DETAILS[selectedPlan];
         const isDayPass = selectedPlan === 'daypass';
         
-        const date = new Date();
-        date.setDate(date.getDate() + 30);
+       const date = new Date();
+        date.setMonth(date.getMonth() + 1); // Automatically handles varying month lengths (28, 30, 31 days)
         const nextPaymentDate = isDayPass ? null : date.toISOString();
-
+        
         // Fetch existing dates so we don't accidentally wipe them when buying a monthly plan
         const { data: existingSub } = await supabase
           .from('user_subscriptions')

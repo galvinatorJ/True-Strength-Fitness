@@ -1,4 +1,5 @@
 import { Ionicons } from '@expo/vector-icons';
+import { Asset } from 'expo-asset';
 import * as FileSystem from 'expo-file-system/legacy';
 import * as Print from 'expo-print';
 import { useFocusEffect, useRouter } from 'expo-router';
@@ -201,61 +202,90 @@ export default function QRScreen() {
     }, [hasSignedWaiver])
   );
 
-  const generateWaiverHTML = (name: string, signature: string) => {
-    const dateString = new Date().toLocaleDateString('en-GB', {
-      day: 'numeric',
-      month: 'long',
-      year: 'numeric',
-    });
-
-    return `
-      <!DOCTYPE html>
-      <html>
-        <head>
-          <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no" />
-          <style>
-            body { font-family: Helvetica, Arial, sans-serif; padding: 40px; color: #111; line-height: 1.5; }
-            h1 { color: #FF0A7A; text-align: center; font-size: 24px; margin-bottom: 5px; }
-            .subtitle { text-align: center; color: #666; font-size: 14px; margin-bottom: 30px; }
-            .section { margin-bottom: 20px; font-size: 13px; }
-            .section h3 { font-size: 15px; margin-bottom: 5px; color: #333; }
-            .sig-box { margin-top: 40px; border-top: 2px solid #ddd; padding-top: 20px; }
-            .signature { font-family: 'Courier New', Courier, monospace; font-size: 22px; font-style: italic; font-weight: bold; color: #000; }
-            .footer { margin-top: 50px; text-align: center; font-size: 10px; color: #999; }
-          </style>
-        </head>
-        <body>
-          <h1>GYM LIABILITY WAIVER & RELEASE</h1>
-          <div class="subtitle">Official Membership Access Agreement</div>
-          
-          <div class="section">
-            <h3>1. Physical Condition & Assumption of Risk</h3>
-            <p>By signing below, I acknowledge that participating in exercise and gym activities involves inherent risks of physical injury. I declare that I am physically fit and have no medical condition that would prevent my safe participation.</p>
-          </div>
-
-          <div class="section">
-            <h3>2. Code of Conduct & Safety Rules</h3>
-            <p>I agree to abide by all facility rules, return equipment to proper storage after use, and treat staff and fellow members with respect at all times.</p>
-          </div>
-
-          <div class="section">
-            <h3>3. Limitation of Liability</h3>
-            <p>I release True Strength Gym, its owners, and employees from any liability for personal injury, property loss, or damage incurred on the premises to the fullest extent permitted by law.</p>
-          </div>
-
-          <div class="sig-box">
-            <p><strong>Full Printed Name:</strong> ${name}</p>
-            <p><strong>Digital Signature:</strong> <span class="signature">${signature}</span></p>
-            <p><strong>Date Signed:</strong> ${dateString}</p>
-          </div>
-
-          <div class="footer">
-            Generated via True Strength Gym Mobile App &bull; User ID: ${userId || 'N/A'}
-          </div>
-        </body>
-      </html>
-    `;
+  const getBase64Logo = async () => {
+    try {
+      const logoAsset = Asset.fromModule(require('../../../assets/images/logo.jpeg'));
+      await logoAsset.downloadAsync();
+      const base64 = await FileSystem.readAsStringAsync(logoAsset.localUri!, {
+        encoding: FileSystem.EncodingType.Base64,
+      });
+      return `data:image/jpeg;base64,${base64}`;
+    } catch (e) {
+      console.warn('Could not load local logo for PDF:', e);
+      return '';
+    }
   };
+
+ const generateWaiverHTML = (name: string, signature: string, logoSrc: string) => {
+  const dateString = new Date().toLocaleDateString('en-GB', {
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric',
+  });
+
+  return `
+    <!DOCTYPE html>
+    <html>
+      <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no" />
+        <style>
+          * { box-sizing: border-box; }
+          body { 
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; 
+            padding: 35px 40px; 
+            color: #222222; 
+            line-height: 1.6; 
+            background-color: #ffffff;
+          }
+          .header { text-align: center; margin-bottom: 25px; }
+          .logo { max-width: 130px; height: auto; margin-bottom: 12px; }
+          h1 { color: #111111; text-align: center; font-size: 22px; margin: 0 0 4px 0; text-transform: uppercase; letter-spacing: 0.8px; }
+          .subtitle { text-align: center; color: #FF0A7A; font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: 1.2px; margin-bottom: 25px; }
+          .card { background-color: #F8F9FA; border-radius: 10px; border-left: 4px solid #FF0A7A; padding: 18px 20px; margin-bottom: 18px; }
+          .section h3 { font-size: 14px; margin: 0 0 6px 0; color: #111111; text-transform: uppercase; letter-spacing: 0.5px; }
+          .section p { font-size: 12px; margin: 0; color: #444444; }
+          .sig-box { margin-top: 35px; background: #FAF9FA; border: 1.5px dashed #FF0A7A; border-radius: 10px; padding: 20px; }
+          .sig-row { display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 12px; }
+          .sig-label { font-weight: bold; color: #333333; }
+          .signature { font-family: 'Courier New', Courier, monospace; font-size: 20px; font-style: italic; font-weight: bold; color: #FF0A7A; }
+          .footer { margin-top: 40px; text-align: center; font-size: 10px; color: #888888; border-top: 1px solid #EEEEEE; padding-top: 15px; }
+        </style>
+      </head>
+      <body>
+        <div class="header">
+          <img src="${logoSrc}" class="logo" alt="True Strength Logo" />
+          <h1>Gym Liability Waiver & Release</h1>
+          <div class="subtitle">Official Membership Access Agreement</div>
+        </div>
+        
+        <div class="card section">
+          <h3>1. Physical Condition & Assumption of Risk</h3>
+          <p>By signing below, I acknowledge that participating in exercise and gym activities involves inherent risks of physical injury. I declare that I am physically fit, authorised to engage in exercise, and have no medical condition that would prevent my safe participation.</p>
+        </div>
+
+        <div class="card section">
+          <h3>2. Code of Conduct & Safety Rules</h3>
+          <p>I agree to abide by all facility rules, return equipment to proper storage after use, minimise disruptions, and treat staff, authorised trainers, and fellow members with respect at all times.</p>
+        </div>
+
+        <div class="card section">
+          <h3>3. Limitation of Liability</h3>
+          <p>I release True Strength Gym, its owners, and employees from any liability for personal injury, property loss, or damage incurred on the premises to the fullest extent permitted by law.</p>
+        </div>
+
+        <div class="sig-box">
+          <div class="sig-row"><span class="sig-label">Full Printed Name:</span> <span>${name}</span></div>
+          <div class="sig-row"><span class="sig-label">Digital Signature:</span> <span class="signature">${signature}</span></div>
+          <div class="sig-row" style="margin-bottom: 0;"><span class="sig-label">Date Signed:</span> <span>${dateString}</span></div>
+        </div>
+
+        <div class="footer">
+          Generated via True Strength Gym Mobile App &bull; User ID: ${userId || 'N/A'}
+        </div>
+      </body>
+    </html>
+  `;
+};
 
   const generateAndSharePDF = async (htmlContent: string) => {
     try {
@@ -289,7 +319,7 @@ export default function QRScreen() {
     }
   };
 
-  const handleSignWaiver = async () => {
+ const handleSignWaiver = async () => {
     setErrorMessage(null);
 
     if (!signerName.trim() || !signatureText.trim()) {
@@ -299,7 +329,8 @@ export default function QRScreen() {
 
     setIsSubmittingWaiver(true);
     try {
-      const htmlContent = generateWaiverHTML(signerName, signatureText);
+      const logoSrc = await getBase64Logo();
+      const htmlContent = generateWaiverHTML(signerName, signatureText, logoSrc);
 
       if (userId) {
         const { error } = await supabase
@@ -326,13 +357,14 @@ export default function QRScreen() {
     }
   };
 
-  const handleViewExistingWaiver = async () => {
+ const handleViewExistingWaiver = async () => {
     setErrorMessage(null);
     try {
       const nameToUse = signerName.trim() || 'Member';
       const sigToUse = signatureText.trim() || nameToUse;
 
-      const htmlContent = generateWaiverHTML(nameToUse, sigToUse);
+      const logoSrc = await getBase64Logo();
+      const htmlContent = generateWaiverHTML(nameToUse, sigToUse, logoSrc);
       await generateAndSharePDF(htmlContent);
     } catch (err) {
       setErrorMessage('Could not open signed waiver document.');
@@ -377,21 +409,21 @@ export default function QRScreen() {
           </View>
 
           <ScrollView style={styles.termsScrollView} contentContainerStyle={styles.termsContent}>
-            <Text style={styles.termsHeading}>1. Assumption of Risk</Text>
-            <Text style={styles.termsBody}>
-              I understand that physical training, weightlifting, and using gym equipment involve inherent risks of physical injury. I voluntarily assume full responsibility for any risks, injuries, or damages, known or unknown, which I might incur as a result of participating in activities at the facility.
-            </Text>
+  <Text style={styles.termsHeading}>1. Physical Condition & Assumption of Risk</Text>
+  <Text style={styles.termsBody}>
+    By signing below, I acknowledge that participating in exercise and gym activities involves inherent risks of physical injury. I declare that I am physically fit, authorised to engage in exercise, and have no medical condition that would prevent my safe participation.
+  </Text>
 
-            <Text style={styles.termsHeading}>2. Rules & Etiquette</Text>
-            <Text style={styles.termsBody}>
-              I agree to re-rack all weights after use, sanitize equipment, and follow all posted guidelines and directions provided by staff members.
-            </Text>
+  <Text style={styles.termsHeading}>2. Code of Conduct & Safety Rules</Text>
+  <Text style={styles.termsBody}>
+    I agree to abide by all facility rules, return equipment to proper storage after use, minimise disruptions, and treat staff, authorised trainers, and fellow members with respect at all times.
+  </Text>
 
-            <Text style={styles.termsHeading}>3. Liability Release</Text>
-            <Text style={styles.termsBody}>
-              I release the gym management, staff, and owners from any liability regarding loss of personal items or personal injuries sustained within the premises.
-            </Text>
-          </ScrollView>
+  <Text style={styles.termsHeading}>3. Limitation of Liability</Text>
+  <Text style={styles.termsBody}>
+    I release True Strength Gym, its owners, and employees from any liability for personal injury, property loss, or damage incurred on the premises to the fullest extent permitted by law.
+  </Text>
+</ScrollView>
 
           <View style={styles.formContainer}>
             <Text style={styles.inputLabel}>Full Legal Name</Text>

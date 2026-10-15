@@ -2,7 +2,7 @@
   "expo": {
     "name": "True Strength",
     "slug": "true-strength",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "scheme": "truestrength",
@@ -10,13 +10,16 @@
     "ios": {
       "bundleIdentifier": "uk.co.truestrengthandfitness.app",
       "infoPlist": {
-        "NSCameraUsageDescription": "True Strength requires camera access to allow staff members to scan customer QR codes for gym entrance verification."
+        "NSCameraUsageDescription": "Only admin/staff accounts require camera access. This allows staff to scan QR codes for physical gym entry.",
+        "ITSAppUsesNonExemptEncryption": false
       }
     },
     "android": {
       "package": "com.truestrength.app",
+      "versionCode": 2,
       "permissions": [
-        "android.permission.CAMERA"
+        "android.permission.CAMERA",
+        "android.permission.RECORD_AUDIO"
       ],
       "predictiveBackGestureEnabled": false
     },
@@ -44,7 +47,7 @@
       [
         "expo-camera",
         {
-          "cameraPermission": "True Strength requires camera access to allow staff members to scan customer QR codes for gym entrance verification."
+          "cameraPermission": "Only admin/staff accounts require camera access. This allows staff to scan QR codes for physical gym entry."
         }
       ]
     ],
@@ -58,6 +61,12 @@
         "projectId": "8a23d9b8-25df-4924-96ea-02b816f77539"
       }
     },
-    "owner": "galvinatorj"
+    "owner": "galvinatorj",
+    "runtimeVersion": {
+      "policy": "appVersion"
+    },
+    "updates": {
+      "url": "https://u.expo.dev/8a23d9b8-25df-4924-96ea-02b816f77539"
+    }
   }
 }

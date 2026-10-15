@@ -59,13 +59,13 @@ Deno.serve(async (req: Request) => {
 
       if (amountTotal === 3000) {
         planName = 'Pre-release (Promotion) - 12 Month Contract';
-        priceId = 'price_1U1luD9nla8sR27v1b3SC1lG';
+        priceId = 'price_1UEUTi7RMmHfKOtjGM43aWfj';
       } else if (amountTotal === 4000) {
         planName = 'Full Gym Use - 12 Month Contract';
-        priceId = 'price_1TwL9F9nla8sR27vfPqFjnVm';
+        priceId = 'price_1UEUTx7RMmHfKOtjCBZnAknR';
       } else if (amountTotal === 5000) {
         planName = 'Full Gym Use - Pay Monthly';
-        priceId = 'price_1U1lzl9nla8sR27vjOZPWodX';
+        priceId = 'price_1UEUU17RMmHfKOtjO7vbTR6b';
       }
 
       try {
@@ -150,9 +150,9 @@ Deno.serve(async (req: Request) => {
       const priceId = subscription.items.data[0]?.price.id;
       let planName = 'In-App Gym Membership';
       
-      if (priceId === 'price_1U1luD9nla8sR27v1b3SC1lG') planName = 'Pre-release (Promotion) - 12 Month Contract';
-      else if (priceId === 'price_1TwL9F9nla8sR27vfPqFjnVm') planName = 'Full Gym Use - 12 Month Contract';
-      else if (priceId === 'price_1U1lzl9nla8sR27vjOZPWodX') planName = 'Full Gym Use - Pay Monthly';
+      if (priceId === 'price_1UEUTi7RMmHfKOtjGM43aWfj') planName = 'Pre-release (Promotion) - 12 Month Contract';
+      else if (priceId === 'price_1UEUTx7RMmHfKOtjCBZnAknR') planName = 'Full Gym Use - 12 Month Contract';
+      else if (priceId === 'price_1UEUU17RMmHfKOtjO7vbTR6b') planName = 'Full Gym Use - Pay Monthly';
 
       let nextPaymentDate = new Date();
       if (subscription.current_period_end) {
@@ -199,7 +199,7 @@ Deno.serve(async (req: Request) => {
       if (!subscriptionId && line.subscription) {
         subscriptionId = typeof line.subscription === 'string' 
           ? line.subscription 
-          : (line.subscription as any).id;
+          : (line.subscription as Stripe.Subscription).id;
       }
     }
 
@@ -234,9 +234,9 @@ Deno.serve(async (req: Request) => {
             userId = subscription.metadata?.supabase_user_id;
             
             const priceId = subscription.items?.data[0]?.price.id;
-            if (priceId === 'price_1U1luD9nla8sR27v1b3SC1lG') planName = 'Pre-release (Promotion) - 12 Month Contract';
-            else if (priceId === 'price_1TwL9F9nla8sR27vfPqFjnVm') planName = 'Full Gym Use - 12 Month Contract';
-            else if (priceId === 'price_1U1lzl9nla8sR27vjOZPWodX') planName = 'Full Gym Use - Pay Monthly';
+            if (priceId === 'price_1UEUTi7RMmHfKOtjGM43aWfj') planName = 'Pre-release (Promotion) - 12 Month Contract';
+            else if (priceId === 'price_1UEUTx7RMmHfKOtjCBZnAknR') planName = 'Full Gym Use - 12 Month Contract';
+            else if (priceId === 'price_1UEUU17RMmHfKOtjO7vbTR6b') planName = 'Full Gym Use - Pay Monthly';
             else planName = subscription.metadata?.plan_type || planName;
 
             // Check if this payment is for the final month
@@ -317,10 +317,10 @@ Deno.serve(async (req: Request) => {
   }
 
   // 3. PAYMENT FAILED OR SUBSCRIPTION DELETED
-  if (event.type === 'invoice.payment_failed' || event.type === 'customer.subscription.deleted') {
-    console.log(`--- RECEIVED EVENT: ${event.type} ---`);
-    const obj = event.data.object as any;
-    const customerId = obj.customer as string;
+ if (event.type === 'invoice.payment_failed' || event.type === 'customer.subscription.deleted') {
+  console.log(`--- RECEIVED EVENT: ${event.type} ---`);
+  const obj = event.data.object as Stripe.Invoice | Stripe.Subscription;
+  const customerId = obj.customer as string;
 
     console.log(`Processing failure/deletion for Customer: ${customerId}`);
 
@@ -368,7 +368,7 @@ Deno.serve(async (req: Request) => {
         updatedStatus = 'cancellation_requested';
       }
 
-      const updateData: Record<string, any> = { 
+      const updateData: Record<string, string | boolean | null> = { 
         cancel_at_period_end: shouldCancelAtPeriodEnd,
         status: updatedStatus,
         updated_at: new Date().toISOString()

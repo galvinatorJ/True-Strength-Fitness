@@ -1,3 +1,4 @@
+import AsyncStorage from '@react-native-async-storage/async-storage'; // <-- IMPORT ASYNCSTORAGE
 import { Stack, useRouter } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import React, { useEffect, useState } from 'react';
@@ -12,8 +13,15 @@ export default function RootLayout() {
   useEffect(() => {
     let isMounted = true;
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
       if (!isMounted) return;
+
+      // 🔥 CRITICAL: Check if we are in a password recovery flow
+      const isRecovery = await AsyncStorage.getItem('is_password_recovery');
+      if (event === 'PASSWORD_RECOVERY' || isRecovery === 'true') {
+        setTimeout(() => { if (isMounted) setIsReady(true); }, 100);
+        return; // Stops _layout from redirecting to home!
+      }
 
       if (!session) {
         router.replace('/');
@@ -36,7 +44,6 @@ export default function RootLayout() {
         setTimeout(() => { if (isMounted) setIsReady(true); }, 100);
         return;
       }
-
       
       // 3. Otherwise, check if regular user subscription exists/is active
       const { data, error } = await supabase
@@ -47,11 +54,6 @@ export default function RootLayout() {
 
       if (!isMounted) return;
 
-      if (error) {
-        console.error("Supabase subscription check error:", error);
-      }
-
-      // Allow active, cancellation_requested, and past_due users into the app home screen
       const allowedHomeStatuses = ['active', 'cancellation_requested', 'past_due'];
 
       if (!data || !allowedHomeStatuses.includes(data.status)) {
@@ -73,7 +75,7 @@ export default function RootLayout() {
 
   return (
     <StripeProvider
-      publishableKey="pk_test_51TwIw69nla8sR27vVjEIHMw7BE39glKqqh7tHjYYkNQJ0zRUa3kp2b140j6G6aAv5HC5zP1Pj12bGd4dD1g1Qv9b00ZdF25UvY"
+      publishableKey="pk_live_51TwIva7RMmHfKOtj1crMx6Q7MFmkWHv3kcbYevZkqDBY4bnOCdyrGsZEX62cGeVlXrxNeE5FiGa9ixArgWiErHJq00gkyh02y3"
       merchantIdentifier="merchant.com.truestrength"
     >
       <StatusBar style="light" />

@@ -1,5 +1,4 @@
 import { createClient } from "@supabase/supabase-js";
-import { serve } from "serve";
 import Stripe from "stripe";
 
 const corsHeaders = {
@@ -7,7 +6,7 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
-serve(async (req) => {
+Deno.serve(async (req: Request) => {
   if (req.method === "OPTIONS") {
     return new Response("ok", { headers: corsHeaders });
   }
@@ -21,7 +20,7 @@ serve(async (req) => {
       });
     }
 
-    let isTestMode = true;
+    let isTestMode = false;
     try {
       const body = await req.json();
       if (typeof body.isTestMode === 'boolean') {
@@ -76,7 +75,6 @@ serve(async (req) => {
 
       // Only cancel in Stripe if NOT a 12-Month Contract
       if (!is12MonthContract) {
-        // Fallback to STRIPE_SECRET_KEY if specific test/live keys are not set
         const stripeKey = isTestMode
           ? (Deno.env.get("STRIPE_TEST_SECRET_KEY") || Deno.env.get("STRIPE_SECRET_KEY"))
           : (Deno.env.get("STRIPE_LIVE_SECRET_KEY") || Deno.env.get("STRIPE_SECRET_KEY"));
@@ -87,9 +85,9 @@ serve(async (req) => {
             console.log(`Attempting to cancel Stripe subscription: ${subData.stripe_subscription_id}`);
             await stripe.subscriptions.cancel(subData.stripe_subscription_id);
             console.log("Successfully canceled Stripe subscription.");
-          } catch (stripeErr: any) {
-            // Changed from warn to error so it highlights in Supabase logs
-            console.error("STRIPE CANCELLATION ERROR:", stripeErr?.message || stripeErr);
+          } catch (stripeErr: unknown) {
+            const errorMessage = stripeErr instanceof Error ? stripeErr.message : String(stripeErr);
+            console.error("STRIPE CANCELLATION ERROR:", errorMessage);
           }
         } else {
           console.error(`Missing Stripe key in Edge Function secrets! (isTestMode: ${isTestMode})`);
@@ -121,10 +119,11 @@ serve(async (req) => {
       JSON.stringify({ success: true, message: "Account deleted successfully." }),
       { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
-  } catch (err: any) {
+  } catch (err: unknown) {
+    const errorMessage = err instanceof Error ? err.message : "An unexpected error occurred during account deletion.";
     console.error("Delete account error:", err);
     return new Response(
-      JSON.stringify({ error: err?.message || "An unexpected error occurred during account deletion." }),
+      JSON.stringify({ error: errorMessage }),
       { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   }

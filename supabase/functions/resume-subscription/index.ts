@@ -53,6 +53,7 @@ Deno.serve(async (req: Request) => {
       await stripe.subscriptions.update(sub.stripe_subscription_id, {
         payment_settings: {
           save_default_payment_method: 'on_subscription',
+          payment_method_types: ['card'], // <--- Forces card-only payments
         },
       });
 

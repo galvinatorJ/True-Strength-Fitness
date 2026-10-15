@@ -21,7 +21,7 @@ serve(async (req) => {
       });
     }
 
-    let isTestMode = true;
+    let isTestMode = false;
     let action = 'cancel_at_period_end';
 
     try {

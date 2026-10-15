@@ -45,7 +45,7 @@ Deno.serve(async (req: Request) => {
     );
 
     // 👇 ADDED passDate to the destructured request body
-    const { priceId, planType, passDate, mode = 'test' } = await req.json();
+    const { priceId, planType, passDate, mode = 'live' } = await req.json();
     const activeStripe = mode === 'live' ? stripeLive : stripeTest;
 
     const { data: subRecord } = await supabaseAdmin
@@ -92,7 +92,7 @@ Deno.serve(async (req: Request) => {
         amount: 1500, // £15.00
         currency: 'gbp',
         customer: customerId,
-        payment_method_types: ['card', 'klarna', 'link'],
+        payment_method_types: ['card'],
         metadata: { 
           supabase_user_id: user.id, 
           plan_type: planType,
@@ -101,10 +101,11 @@ Deno.serve(async (req: Request) => {
       });
       paymentIntentClientSecret = paymentIntent.client_secret;
     } else {
+
       // EXISTING MONTHLY LOGIC - UNTOUCHED
       const is12MonthContract = 
-        priceId === 'price_1U1luD9nla8sR27v1b3SC1lG' || 
-        priceId === 'price_1TwL9F9nla8sR27vfPqFjnVm';
+        priceId === 'price_1UEUTi7RMmHfKOtjGM43aWfj' || 
+        priceId === 'price_1UEUTx7RMmHfKOtjCBZnAknR';
 
       let cancelAtTimestamp = undefined;
       if (is12MonthContract) {
@@ -120,7 +121,7 @@ Deno.serve(async (req: Request) => {
         payment_behavior: 'default_incomplete',
         payment_settings: {
           save_default_payment_method: 'on_subscription',
-          payment_method_types: ['card', 'bacs_debit'],
+          payment_method_types: ['card'],
         },
         expand: ['latest_invoice.payment_intent', 'pending_setup_intent'],
         metadata: { supabase_user_id: user.id, plan_type: planType },

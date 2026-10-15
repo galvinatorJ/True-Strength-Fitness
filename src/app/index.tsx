@@ -1,8 +1,10 @@
 import { Ionicons } from '@expo/vector-icons';
+import AsyncStorage from '@react-native-async-storage/async-storage'; // Ensure imported
 import { useRouter } from 'expo-router';
 import React, { useEffect, useState } from 'react';
 import {
   ActivityIndicator,
+  AppState,
   Image,
   KeyboardAvoidingView,
   Linking,
@@ -27,14 +29,17 @@ const theme = {
   success: '#34C759', 
 };
 
+
+let lastProcessedUrl: string | null = null;
 export default function AuthScreen() {
   const router = useRouter();
-  
+ 
   // App Navigation States
   const [isLogin, setIsLogin] = useState(true);
   const [accountCreated, setAccountCreated] = useState(false); 
   const [isResettingPassword, setIsResettingPassword] = useState(false); // NEW STATE
   
+
   const [loading, setLoading] = useState(false);
   
   // Inline message states
@@ -48,17 +53,48 @@ export default function AuthScreen() {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [acceptedPrivacy, setAcceptedPrivacy] = useState(false);
 
-  // Listen for Supabase auth state changes (Magic Links & Password Recovery)
+  // --- ADD THESE NEW STATES ---
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const appState = React.useRef(AppState.currentState);
+
+
+  const isNetworkError = (msg: string) => {
+    const lower = msg.toLowerCase();
+    return lower.includes('fetch failed') || lower.includes('network request failed') || lower.includes('unable to resolve host');
+  };
+
+  // --- ADD THIS EFFECT TO CLEAR PASSWORDS WHEN APP LEAVES FOREGROUND ---
   useEffect(() => {
+    const subscription = AppState.addEventListener('change', (nextAppState) => {
+      if (
+        appState.current.match(/active/) &&
+        (nextAppState === 'inactive' || nextAppState === 'background')
+      ) {
+        setPassword('');
+        setConfirmPassword('');
+      }
+      appState.current = nextAppState;
+    });
+
+    return () => {
+      subscription.remove();
+    };
+  }, []);
+
+// Listen for Supabase auth state changes and manual Deep Links
+  useEffect(() => {
+    // 1. Standard Auth Listener (Single source of truth for recovery state)
     const { data: authListener } = supabase.auth.onAuthStateChange(async (event, session) => {
+      console.log('Auth event:', event);
       if (event === 'USER_UPDATED') {
         setAccountCreated(false);
         setIsLogin(true);
         setErrorText(null);
         setSuccessText('Your account has been verified. You can now sign in.');
       } 
-      // 🔥 NEW: Triggered when user clicks the password reset deep link
       else if (event === 'PASSWORD_RECOVERY') {
+        await AsyncStorage.setItem('is_password_recovery', 'true');
         setAccountCreated(false);
         setIsResettingPassword(true);
         setErrorText(null);
@@ -66,10 +102,80 @@ export default function AuthScreen() {
       }
     });
 
+    // 2. Streamlined Deep Link Interceptor
+    const processDeepLink = async (url: string | null) => {
+      if (!url) return;
+      
+      console.log('Incoming Deep Link URL:', url);
+
+      try {
+        setLoading(true);
+
+        // Handle Token Hash / OTP Recovery Flow
+        if (url.includes('token_hash=') || (url.includes('token=') && url.includes('type=recovery'))) {
+          const match = url.match(/[?&]token_hash=([^&]+)/) || url.match(/[?&]token=([^&]+)/);
+          if (match && match[1]) {
+            const tokenHash = decodeURIComponent(match[1]);
+            const { error } = await supabase.auth.verifyOtp({
+              token_hash: tokenHash,
+              type: 'recovery',
+            });
+            
+            if (error) {
+              // If expired or already used, wipe session and force clean login
+              await supabase.auth.signOut();
+              setIsResettingPassword(false);
+              setIsLogin(true);
+              setPassword('');
+              setConfirmPassword('');
+              setErrorText('This password reset link has expired or has already been used. Please request a new one.');
+            }
+            // Note: If successful, onAuthStateChange ('PASSWORD_RECOVERY') handles opening the form automatically!
+          }
+        }
+        // Handle PKCE Code Flow if applicable
+        else if (url.includes('code=')) {
+          const codeMatch = url.match(/[?&]code=([^&]+)/);
+          if (codeMatch && codeMatch[1]) {
+            const code = decodeURIComponent(codeMatch[1]);
+            const { error } = await supabase.auth.exchangeCodeForSession(code);
+            if (error) {
+              await supabase.auth.signOut();
+              setIsResettingPassword(false);
+              setIsLogin(true);
+              setErrorText('Password reset session error. Please request a new link.');
+            }
+          }
+        }
+      } catch (err: any) {
+        setErrorText('Deep link error: ' + err.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    // Handle deep link when app opens from a fully closed state
+    Linking.getInitialURL().then((url) => {
+      if (url && url !== lastProcessedUrl) {
+        lastProcessedUrl = url;
+        processDeepLink(url);
+      }
+    });
+
+    // Handle deep link when app is already running in the background
+    const subscription = Linking.addEventListener('url', (event) => {
+      if (event.url && event.url !== lastProcessedUrl) {
+        lastProcessedUrl = event.url;
+        processDeepLink(event.url);
+      }
+    });
+
     return () => {
       authListener.subscription.unsubscribe();
+      subscription.remove();
     };
   }, []);
+
 
   // Helper to format missing fields array cleanly
   const formatFieldsList = (fields: string[]) => {
@@ -78,31 +184,39 @@ export default function AuthScreen() {
     return `${fields.slice(0, -1).join(', ')}, and ${fields[fields.length - 1]}`;
   };
 
-  const handleForgotPassword = async () => {
-    setErrorText(null);
-    setSuccessText(null);
+const handleForgotPassword = async () => {
+  setErrorText(null);
+  setSuccessText(null);
 
-    const cleanEmail = email.trim();
-    if (!cleanEmail) {
-      setErrorText('Please enter your email address to reset your password.');
-      return;
-    }
+  const cleanEmail = email.trim();
+  if (!cleanEmail) {
+    setErrorText('Please enter your email address to reset your password.');
+    return;
+  }
 
-    setLoading(true);
+  setLoading(true);
+  try {
     const { error } = await supabase.auth.resetPasswordForEmail(cleanEmail, {
-      // 🔥 Redirects back to the app using your custom URL scheme
-      redirectTo: 'truestrength://reset-password',
+      redirectTo: 'truestrength://',
     });
     setLoading(false);
 
     if (error) {
-      setErrorText(error.message);
+      if (isNetworkError(error.message)) {
+        setErrorText('Unable to connect to the network. Please check your internet connection and try again.');
+      } else {
+        setErrorText(error.message);
+      }
     } else {
+      setPassword(''); 
       setSuccessText('Password reset instructions have been sent to your email.');
     }
-  };
+  } catch (err: any) {
+    setLoading(false);
+    setErrorText('Unable to connect to the network. Please check your internet connection and try again.');
+  }
+};
 
-  // 🔥 NEW: Function to handle saving the new password
   const handleUpdatePassword = async () => {
     setErrorText(null);
     setSuccessText(null);
@@ -126,8 +240,10 @@ export default function AuthScreen() {
     if (error) {
       setErrorText(error.message);
     } else {
-      // Success! Send them back to login and sign them out just in case
+      // ✅ SUCCESS: Now clean up session and recovery flag
       await supabase.auth.signOut();
+      await AsyncStorage.removeItem('is_password_recovery');
+      
       setIsResettingPassword(false);
       setPassword('');
       setConfirmPassword('');
@@ -178,120 +294,137 @@ export default function AuthScreen() {
 
     setLoading(true);
 
-    if (isLogin) {
-      // PRE-CHECK: Securely check if email exists using our database RPC
-      const { data: emailExists, error: checkError } = await supabase
-        .rpc('check_email_exists', { lookup_email: cleanEmail });
+    try {
+      if (isLogin) {
+        // PRE-CHECK: Securely check if email exists using our database RPC
+        const { data: emailExists, error: checkError } = await supabase
+          .rpc('check_email_exists', { lookup_email: cleanEmail });
 
-      // If the RPC explicitly returns false, block login and show custom error
-      if (!checkError && emailExists === false) {
-        setLoading(false);
-        setErrorText("Email doesn't exist, please create your account first.");
-        return;
-      }
+        // If the RPC explicitly returns false, block login and show custom error
+        if (!checkError && emailExists === false) {
+          setLoading(false);
+          setErrorText("Email doesn't exist, please create your account first.");
+          return;
+        }
 
-      // Proceed with actual login
-      const { user, error } = await signIn(cleanEmail, password);
-      
-      if (error) {
-        setLoading(false);
-        if (error.message.includes('Email not confirmed')) {
+        // Proceed with actual login
+        const { user, error } = await signIn(cleanEmail, password);
+        
+        if (error) {
+          setLoading(false);
+         if (isNetworkError(error.message)) {
+            setErrorText('Unable to connect to the network. Please check your internet connection and try again.');
+        } else if (error.message.includes('Email not confirmed')) {
           setErrorText('unverified');
         } else if (error.message.includes('Invalid login credentials') || error.message.includes('invalid') || error.message.includes('password')) {
-          setErrorText('invalid_credentials');
-        } else {
-          setErrorText(error.message);
-        }
-      } else if (user) {
-        // Check profile verification and role status from database
-        const { data: profile, error: profileError } = await supabase
-          .from('profiles')
-          .select('is_verified, role')
-          .eq('id', user.id)
-          .single();
+            setErrorText('invalid_credentials');
+          } else {
+            setErrorText(error.message);
+          }
+        } else if (user) {
+          // Check profile verification and role status from database
+          const { data: profile, error: profileError } = await supabase
+            .from('profiles')
+            .select('is_verified, role')
+            .eq('id', user.id)
+            .single();
 
-        if (profileError || !profile?.is_verified) {
-          await supabase.auth.signOut(); 
+          if (profileError || !profile?.is_verified) {
+            await supabase.auth.signOut(); 
+            setLoading(false);
+            setAccountCreated(true); 
+            return;
+          }
+
+          if (profile?.role && profile.role.toLowerCase() === 'admin') {
+            setLoading(false);
+            router.replace('/home'); 
+            return;
+          }
+
+          // Check subscription status
+          const { data: sub, error: subError } = await supabase
+            .from('user_subscriptions')
+            .select('status, plan_name, next_payment_date')
+            .eq('user_id', user.id)
+            .maybeSingle();
+
+          const allowedHomeStatuses = ['active', 'cancellation_requested', 'past_due'];
+          const isAllowedHome = !subError && sub && allowedHomeStatuses.includes(sub.status);
+
           setLoading(false);
-          setAccountCreated(true); 
-          return;
+
+          if (isAllowedHome) {
+            router.replace('/home'); 
+          } else {
+            router.replace('/membership');
+          }
         }
-
-        if (profile?.role && profile.role.toLowerCase() === 'admin') {
-          setLoading(false);
-          router.replace('/home'); 
-          return;
-        }
-
-        // Check subscription status
-        const { data: sub, error: subError } = await supabase
-          .from('user_subscriptions')
-          .select('status, plan_name, next_payment_date')
-          .eq('user_id', user.id)
-          .maybeSingle();
-
-        const allowedHomeStatuses = ['active', 'cancellation_requested', 'past_due'];
-        const isAllowedHome = !subError && sub && allowedHomeStatuses.includes(sub.status);
-
-        setLoading(false);
-
-        if (isAllowedHome) {
-          router.replace('/home'); 
-        } else {
-          router.replace('/membership');
-        }
-      }
-    } else {
-      // SIGN UP FLOW
-      const { data: emailExists, error: checkError } = await supabase
-        .rpc('check_email_exists', { lookup_email: cleanEmail });
-
-      if (!checkError && emailExists === true) {
-        setLoading(false);
-        setErrorText('already_registered');
-        return;
-      }
-
-      const { data: authData, error } = await supabase.auth.signUp({
-        email: cleanEmail,
-        password: password,
-        options: {
-          data: {
-            full_name: fullName.trim(),
-          },
-          emailRedirectTo: 'truestrength://email-address-confirmed/',
-        }
-      });
-      
-      const user = authData?.user;
-      
-      if (error) {
-        setLoading(false);
-        if (error.message.includes('security purposes') || error.message.includes('rate limit')) {
-          setErrorText('already_registered');
-        } else {
-          setErrorText(error.message);
-        }
-      } else if (user) {
-        await supabase.from('profiles').upsert({
-          id: user.id,
-          email: cleanEmail,
-          full_name: fullName.trim(),
-          is_verified: false,
-          role: 'user'
-        }, { onConflict: 'id' });
-
-        await supabase.from('user_subscriptions').upsert({
-          user_id: user.id,
-          status: 'inactive'
-        }, { onConflict: 'user_id' });
-
-        setLoading(false);
-        setIsLogin(true);
-        setAccountCreated(true); 
       } else {
-        setLoading(false);
+  // SIGN UP FLOW
+  const { data: emailExists, error: checkError } = await supabase
+    .rpc('check_email_exists', { lookup_email: cleanEmail });
+
+  if (checkError) {
+    if (isNetworkError(checkError.message)) {
+      setLoading(false);
+      setErrorText('Unable to connect to the network. Please check your internet connection and try again.');
+      return;
+    }
+  }
+
+  if (!checkError && emailExists === true) {
+    setLoading(false);
+    setErrorText('already_registered');
+    return;
+  }
+
+  const { data: authData, error } = await supabase.auth.signUp({
+    email: cleanEmail,
+    password: password,
+    options: {
+      data: {
+        full_name: fullName.trim(),
+      },
+      emailRedirectTo: 'truestrength://email-address-confirmed/',
+    }
+  });
+  
+  const user = authData?.user;
+  
+  if (error) {
+    setLoading(false);
+    if (isNetworkError(error.message)) {
+      setErrorText('Unable to connect to the network. Please check your internet connection and try again.');
+    } else if (error.message.includes('security purposes') || error.message.includes('rate limit')) {
+      setErrorText('already_registered');
+    } else {
+      setErrorText(error.message);
+    }
+  } else if (user) {
+          await supabase.from('profiles').upsert({
+            id: user.id,
+            email: cleanEmail,
+            full_name: fullName.trim(),
+            is_verified: false,
+            role: 'user'
+          }, { onConflict: 'id' });
+
+          await supabase.from('user_subscriptions').upsert({
+            user_id: user.id,
+            status: 'inactive'
+          }, { onConflict: 'user_id' });
+
+          setLoading(false);
+          setIsLogin(true);
+          setAccountCreated(true); 
+        } else {
+          setLoading(false);
+        }
       }
+    } catch (err: any) {
+      setLoading(false);
+      setErrorText('Unable to connect to the network. Please check your internet connection and try again.');
     }
   };
 
@@ -388,7 +521,7 @@ export default function AuthScreen() {
                 </View>
               )}
 
-              <View style={styles.inputContainer}>
+             <View style={styles.inputContainer}>
                 <Ionicons name="lock-closed-outline" size={20} color={theme.textMuted} style={styles.inputIcon} />
                 <TextInput
                   style={styles.inputWithIcon}
@@ -396,8 +529,11 @@ export default function AuthScreen() {
                   placeholderTextColor={theme.textMuted}
                   value={password}
                   onChangeText={setPassword}
-                  secureTextEntry
+                  secureTextEntry={!showPassword}
                 />
+                <TouchableOpacity onPress={() => setShowPassword(!showPassword)}>
+                  <Ionicons name={showPassword ? 'eye-outline' : 'eye-off-outline'} size={20} color={theme.textMuted} />
+                </TouchableOpacity>
               </View>
 
               <View style={styles.inputContainer}>
@@ -408,8 +544,11 @@ export default function AuthScreen() {
                   placeholderTextColor={theme.textMuted}
                   value={confirmPassword}
                   onChangeText={setConfirmPassword}
-                  secureTextEntry
+                  secureTextEntry={!showConfirmPassword}
                 />
+                <TouchableOpacity onPress={() => setShowConfirmPassword(!showConfirmPassword)}>
+                  <Ionicons name={showConfirmPassword ? 'eye-outline' : 'eye-off-outline'} size={20} color={theme.textMuted} />
+                </TouchableOpacity>
               </View>
 
               <TouchableOpacity 
@@ -421,18 +560,21 @@ export default function AuthScreen() {
               </TouchableOpacity>
 
               <TouchableOpacity 
-                style={[styles.secondaryButton, { marginTop: 24 }]} 
-                onPress={() => {
-                  setIsResettingPassword(false);
-                  setIsLogin(true);
-                  setPassword('');
-                  setConfirmPassword('');
-                  setErrorText(null);
-                  setSuccessText(null);
-                }}
-              >
-                <Text style={styles.secondaryButtonText}>Cancel</Text>
-              </TouchableOpacity>
+    style={[styles.secondaryButton, { marginTop: 24, width: '100%' }]} 
+    onPress={async () => {
+      await supabase.auth.signOut();
+      await AsyncStorage.removeItem('is_password_recovery'); // <-- Add this here too
+      
+      setIsResettingPassword(false);
+      setIsLogin(true);
+      setPassword('');
+      setConfirmPassword('');
+      setErrorText(null);
+      setSuccessText(null);
+    }}
+  >
+    <Text style={styles.secondaryButtonText}>Cancel</Text>
+  </TouchableOpacity>
             </>
           ) : accountCreated ? (
             // SUCCESS / VERIFICATION VIEW
@@ -478,10 +620,10 @@ export default function AuthScreen() {
             // STANDARD AUTH VIEW (LOGIN / SIGN UP)
             <>
               <Text style={styles.pageTitle}>
-                {isLogin ? 'Welcome Back' : 'Join True Strength'}
+                {isLogin ? 'Welcome Back' : 'Join True Strength & Fitness'}
               </Text>
               <Text style={styles.tagline}>
-                {isLogin ? 'Train harder. Access easier.' : 'Start your journey today.'}
+                {isLogin ? 'Log in to your account' : 'Start your journey today.'}
               </Text>
 
               {successText !== null && (
@@ -553,7 +695,7 @@ export default function AuthScreen() {
                 />
               </View>
 
-              <View style={styles.inputContainer}>
+             <View style={styles.inputContainer}>
                 <Ionicons name="lock-closed-outline" size={20} color={theme.textMuted} style={styles.inputIcon} />
                 <TextInput
                   style={styles.inputWithIcon}
@@ -561,8 +703,11 @@ export default function AuthScreen() {
                   placeholderTextColor={theme.textMuted}
                   value={password}
                   onChangeText={setPassword}
-                  secureTextEntry
+                  secureTextEntry={!showPassword}
                 />
+                <TouchableOpacity onPress={() => setShowPassword(!showPassword)}>
+                  <Ionicons name={showPassword ? 'eye-outline' : 'eye-off-outline'} size={20} color={theme.textMuted} />
+                </TouchableOpacity>
               </View>
 
               {!isLogin && (
@@ -574,8 +719,11 @@ export default function AuthScreen() {
                     placeholderTextColor={theme.textMuted}
                     value={confirmPassword}
                     onChangeText={setConfirmPassword}
-                    secureTextEntry
+                    secureTextEntry={!showConfirmPassword}
                   />
+                  <TouchableOpacity onPress={() => setShowConfirmPassword(!showConfirmPassword)}>
+                    <Ionicons name={showConfirmPassword ? 'eye-outline' : 'eye-off-outline'} size={20} color={theme.textMuted} />
+                  </TouchableOpacity>
                 </View>
               )}
 
